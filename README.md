@@ -52,7 +52,7 @@ for suffix in -foo -bar -baz; do
 done
 ```
 
-This creates three sets of infrastrucutre for three different clusters.
+This creates three sets of infrastructure with different names suffixes (`-foo`, `-bar`, `-baz`) for three different clusters.
 
 To delete the entire infrastructure, use:
 
