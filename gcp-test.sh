@@ -30,20 +30,28 @@ up() {
     --network k8s"$suffix" \
     --allow tcp,udp,icmp
 
-  # Create compute instance for master node (K8s master node requires 2 CPUs)
-  gcloud compute instances create k8s-master"$suffix" \
+  # Compute instances for master node and worker nodes
+  gcloud compute instances create {k8s-master,k8s-worker-1,k8s-worker-2}"$suffix" \
     --subnet k8s"$suffix" \
     --can-ip-forward \
     --image-family ubuntu-1804-lts \
     --image-project ubuntu-os-cloud \
-    --machine-type n1-standard-2
+    --machine-type e2-medium
 
-  # Create compute instances for worker nodes
-  gcloud compute instances create k8s-worker-1"$suffix" k8s-worker-2"$suffix" \
-    --subnet k8s"$suffix" \
-    --can-ip-forward \
-    --image-family ubuntu-1804-lts \
-    --image-project ubuntu-os-cloud
+#  # Create compute instance for master node (K8s master node requires 2 CPUs)
+#  gcloud compute instances create k8s-master"$suffix" \
+#    --subnet k8s"$suffix" \
+#    --can-ip-forward \
+#    --image-family ubuntu-1804-lts \
+#    --image-project ubuntu-os-cloud \
+#    --machine-type n1-standard-2  # Try with e2-medium
+#
+#  # Create compute instances for worker nodes
+#  gcloud compute instances create k8s-worker-1"$suffix" k8s-worker-2"$suffix" \
+#    --subnet k8s"$suffix" \
+#    --can-ip-forward \
+#    --image-family ubuntu-1804-lts \
+#    --image-project ubuntu-os-cloud  # Try with e2-medium
 }
 
 down() {
