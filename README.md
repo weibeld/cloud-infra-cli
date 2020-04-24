@@ -27,7 +27,7 @@ _Below are details about the specific script for each cloud provider._
 
 ## Amazon Web Services (AWS)
 
-![AWS](aws_resized.png)
+![AWS](assets/aws.png)
 
 ### Usage
 
@@ -63,4 +63,4 @@ For more details, see the output of the `aws.sh up` command.
 
 ## Google Cloud Platform (GCP)
 
-![GCP](gcp.png)
+![GCP](assets/gcp.png)
