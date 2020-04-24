@@ -1,86 +1,66 @@
-# Create Kubernetes infrastructure
+# Cloud test infrastructure
 
-This repository contains a script for creating and deleting the infrastructure for a simple Kubernetes cluster on GCP.
+Scripts for creating a typical cloud infrastructure on the major cloud providers.
 
-The cluster is intended for testing purposes only:
+The purpose of this repo is to show how to use the command-line interfaces (CLIs) of the majour cloud providers to create a typical cloud infrastructure.
 
-- 1 master node, 2 worker nodes
-- Unrestricted GCP firewall
-- Small instances
+## Contents
 
-## Usage
+- **[`aws.sh`](aws.sh):** using the [`aws`](https://aws.amazon.com/cli/) command-line tool with Amazon Web Services (AWS)
+- **[`gcp.sh`](gcp.sh):** using the [`gcloud`](https://cloud.google.com/sdk/gcloud) command-line tool with Google Cloud Platfrom (GCP)
 
-### Basic
+## Cloud infrastructure
 
-Creating infrastructure:
+The cloud infrastructure consists of the following generic components:
 
-```bash
-./gcp-test.sh up
-```
+- A virtual private cloud (VPC) network
+- A subnet (with an IP address range of 10.0.0.0/16)
+- Firewall rules that allow the following types of incoming traffic:
+    - All traffic from other instances in the same VPC network
+    - HTTP traffic from everywhere
+    - SSH traffic from your local machine
+- 3 compute instances
 
-Deleting infrastructure:
+All compute instances get a public IP address and you will be able to connect to them with SSH from your local machine.
 
-```bash
-./gcp-test.sh down
-```
+_Below are details about the specific script for each cloud provider._
 
-### With suffix
+## Amazon Web Services (AWS)
 
-The script can be invoked with an additional suffix argument. The suffix will be appended to the names of all created resources:
+![AWS](aws_resized.png)
 
-```bash
-./gcp-test.sh up -foo
-```
+### Usage
 
-This appends `-foo` to all GCP resource names. For example, the VPC network will be named `k8s-foo`, the master node `k8s-master-foo`, and so on.
-
-The same suffix must be supplied to the `down` command to delete the infrastructure:
+Create the infrastructure:
 
 ```bash
-./gcp-test.sh down -foo
+./aws.sh up
 ```
-
-### Multiple clusters
-
-To create multiple clusters, the script can be invoked in a loop.
-
-In this case, the suffix argument is mandatory to prevent name clashes:
+Delete the infrastructure:
 
 ```bash
-for suffix in -foo -bar -baz; do
-  ./gcp-test.sh up "$suffix"
-done
+./aws.sh down
 ```
+### Resources
 
-This creates three sets of infrastructure with different names suffixes (`-foo`, `-bar`, `-baz`) for three different clusters.
+The [`aws.sh`](aws.sh) script creates (and deletes) the following AWS resources:
 
-To delete the entire infrastructure, use:
+- 1 [VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html) (1 route table, 1 security group, 1 [network ACL](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html))
+- 1 [internet gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html)
+- 1 [subnet](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html)
+- 1 [route table](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html)
+- 2 [security groups](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html)
+- 1 [key pair](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html)
+- 3 [EC2 instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html) (3 [EBS volumes](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AmazonEBS.html), 3 [network interfaces](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html))
+
+After all resources have been created, you can SSH to the instances with:
 
 ```bash
-for suffix in -foo -bar -baz; do
-  ./gcp-test.sh down "$suffix"
-done
+ssh -i aws-test-infra.pem ubuntu@PUBLIC_IP_ADDRESS
 ```
 
-## GCP instance pricing
+For more details, see the output of the `aws.sh up` command.
 
-Hourly prices in the `europe-west6` region (one of the most expensive regions):
+## Google Cloud Platform (GCP)
 
-| Instance                                                                                | Price         | Capacity |
-|-----------------------------------------------------------------------------------------|---------------|----------|
-| [`e2-medium`](https://cloud.google.com/compute/all-pricing#e2_sharedcore_machine_types) | $0.046879 | 1 CPU (2 [shared CPUs](https://cloud.google.com/compute/docs/machine-types#e2_shared-core_machine_types)), 4 GB RAM |
-| [`n1-standard-1`](https://cloud.google.com/compute/all-pricing#n1_machine_types) | $0.066500 | 1 CPU, 3.75 GB RAM |
-| [`e2-standard-2`](https://cloud.google.com/compute/all-pricing#e2_machine-types) | $0.093758 | 2 CPUs, 8 GB RAM |
-| [`n1-standard-2`](https://cloud.google.com/compute/all-pricing#n1_machine_types) | $0.132900 | 2 CPUs, 7.5 GB RAM |
-
-### Example calculations
-
-Cluster with 3 `e2-medium` instances:
-
-- Per hour: $0.140637
-- Per day: $3.38
-
-Cluster with 1 `n1-standard-2` (master node) and 2 `n1-standard-1` instances (worker nodes):
-
-- Per hour: $0.2659
-- Per day: $6.38
+![GCP](gcp.png)
