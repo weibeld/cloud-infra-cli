@@ -1,54 +1,87 @@
 #!/bin/bash
 #
-# Create/delete GCP infrastructure for a Kubernetes cluster with one master and
-# two worker nodes.
+# This script creates (and deletes) the following resources:
 #
-# Intended for testing purposes only since The GCP firewall is unrestricted and
-# the GCP instances are rather small (but cheap).
+#   1 VPC network
+#   1 subnet
+#   3 firewall rules
+#   3 VM instances
 #
-# USAGE:
-# 
-#   k8s-gcp.sh up|down [suffix]
-#
-# The optional suffix is appended to all GCP resource names. This allows, for
-# example, to invoke this script in a loop for creating multiple clusters.
-#
-# The script creates a new VPC network with a single subnet in the current
-# default region. The IP address range of the subnet is 10.0.0.0/16.
+#------------------------------------------------------------------------------#
 
-suffix=$2
+set -e
+
+# Name for the resources. There should be no existing resources with this name.
+name=gcp-example-infra
 
 up() {
-  set -e
-
   # Create VPC network 
-  gcloud compute networks create k8s"$suffix" --subnet-mode custom
-  gcloud compute networks subnets create k8s"$suffix" --network k8s"$suffix" --range 10.0.0.0/16
+  gcloud compute networks create "$name" --subnet-mode custom
 
-  # Add firewall rule to allow all incoming traffic from everywhere (testing)
-  gcloud compute firewall-rules create k8s"$suffix" \
-    --network k8s"$suffix" \
-    --allow tcp,udp,icmp
+  # Create subnet
+  gcloud compute networks subnets create "$name" --network "$name" --range 10.0.0.0/16
 
-  # Compute instances for the cluster nodes
-  gcloud compute instances create {k8s-master,k8s-worker-1,k8s-worker-2}"$suffix" \
-    --subnet k8s"$suffix" \
-    --can-ip-forward \
+  # Create instances
+  gcloud compute instances create "$name"-1 "$name"-2 "$name"-3 \
+    --subnet "$name" \
     --image-family ubuntu-1804-lts \
     --image-project ubuntu-os-cloud \
-    --machine-type e2-medium
+    --machine-type n1-standard-1 \
+    --tags "$name"
+
+  # Create firewall rule 1 (allow all incoming traffic from other instances)
+  gcloud compute firewall-rules create "$name"-internal \
+    --network "$name" \
+    --allow tcp,udp,icmp \
+    --target-tags "$name" \
+    --source-tags "$name"
+
+  # Create firewall rule 2 (allow incoming HTTP traffic from everywhere)
+  gcloud compute firewall-rules create "$name"-http\
+    --network "$name" \
+    --allow tcp:80 \
+    --target-tags "$name"
+
+  # Create firewall rule 3 (allow incoming SSH traffic from your local machine)
+  gcloud compute firewall-rules create "$name"-ssh \
+    --network "$name" \
+    --allow tcp:22 \
+    --target-tags "$name" \
+    --source-ranges "$(curl -s checkip.amazonaws.com)"/32
+
+  cat <<EOF
+
+✅ Done!
+
+You can list the created instances with:
+
+  gcloud compute instances list --filter 'tags.items=$name'
+
+You can log in to an instance through SSH with:
+
+  gcloud compute ssh root@INSTANCE-NAME
+
+EOF
 }
 
 down() {
-  gcloud compute instances delete k8s-master"$suffix" k8s-worker-1"$suffix" k8s-worker-2"$suffix"
-  gcloud compute firewall-rules delete k8s"$suffix"
-  gcloud compute networks subnets delete k8s"$suffix"
-  gcloud compute networks delete k8s"$suffix"
+  gcloud compute instances delete "$name"-1 "$name"-2 "$name"-3
+  gcloud compute firewall-rules delete "$name"-internal "$name"-http "$name"-ssh
+  gcloud compute networks subnets delete "$name"
+  gcloud compute networks delete "$name"
+
+  cat <<EOF
+
+✅ Done!
+
+All resources have been deleted.
+
+EOF
 }
 
 usage() {
   echo "USAGE:"
-  echo "  $(basename $0) up|down [suffix]"
+  echo "  $(basename $0) up|down"
 }
 
 case "$1" in
