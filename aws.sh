@@ -67,7 +67,7 @@ up() {
   aws ec2 run-instances \
     --count 3 \
     --image-id "$ami_id" \
-    --instance-type t2.medium  \
+    --instance-type t2.micro\
     --key-name "$tag_value" \
     --subnet-id "$subnet_id" \
     --security-group-ids "$security_group_1_id" "$security_group_2_id" \
