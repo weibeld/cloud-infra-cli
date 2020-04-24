@@ -1,8 +1,8 @@
-# Cloud test infrastructure
+# Cloud example infrastructure
 
 Scripts for creating a typical cloud infrastructure on the major cloud providers.
 
-The purpose of this repo is to show how to use the command-line interfaces (CLIs) of the majour cloud providers to create a typical cloud infrastructure.
+The purpose of this repo is to show how to use the command-line interfaces (CLIs) of the major cloud providers to create a typical cloud infrastructure.
 
 ## Contents
 
