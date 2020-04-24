@@ -23,7 +23,7 @@ set -e
 # the 'down' step. This tag should not be already used by any other resources.
 # Also, there shouldn't be a key pair with the same name as the tag value.
 tag_key=project
-tag_value=aws-test-infra
+tag_value=aws-example-infra
 
 # Set output format to 'text' to facilitate capturing resource IDs.
 export AWS_DEFAULT_OUTPUT=text 
@@ -47,11 +47,11 @@ up() {
   aws ec2 create-route --route-table-id "$route_table_id" --destination-cidr-block 0.0.0.0/0 --gateway-id "$internet_gateway_id" 
   aws ec2 associate-route-table --route-table-id "$route_table_id" --subnet-id "$subnet_id"
 
-  # Create security group 1 (allowing all incoming internal traffic)
+  # Create security group 1 (allow all incoming traffic from other instances)
   security_group_1_id=$(aws ec2 create-security-group --group-name internal-all --vpc-id "$vpc_id" --description "Allow all incoming traffic from the same security group")
   aws ec2 authorize-security-group-ingress --group-id "$security_group_1_id" --protocol all --source-group "$security_group_1_id"
 
-  # Create security group 2 (allowing incoming HTTP and SSH traffic)
+  # Create security group 2 (allow incoming external HTTP and SSH traffic)
   security_group_2_id=$(aws ec2 create-security-group --group-name external-http-and-ssh --vpc-id "$vpc_id" --description "Allow incoming traffic to port 80 (from everywhere) and port 22 (from specific IP address)")
   aws ec2 authorize-security-group-ingress --group-id "$security_group_2_id" --protocol tcp --port 80 --cidr 0.0.0.0/0
   aws ec2 authorize-security-group-ingress --group-id "$security_group_2_id" --protocol tcp --port 22 --cidr "$(curl -s checkip.amazonaws.com)/32"
@@ -99,7 +99,6 @@ The absolute path of '$tag_value.pem' on your local machine is:
   $(pwd)/$tag_value.pem
 
 EOF
-
 }
 
 down() {
