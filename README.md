@@ -14,16 +14,16 @@ The purpose of this repo is to show how to use the command-line interfaces (CLIs
 The cloud infrastructure consists of the following generic components:
 
 - A virtual private cloud (VPC) network
-- A subnet (with an IP address range of 10.0.0.0/16)
+- A subnet (with a private IP address range of 10.0.0.0/16)
 - Firewall rules that allow the following types of incoming traffic:
-    - All traffic from other instances in the same VPC network
+    - All traffic from other instances of the example infrastructure
     - HTTP traffic from everywhere
     - SSH traffic from your local machine
 - 3 compute instances
 
 All compute instances get a public IP address and you will be able to connect to them with SSH from your local machine.
 
-_Below are details about the specific script for each cloud provider._
+_Below are the details for each cloud provider._
 
 ## Amazon Web Services (AWS)
 
