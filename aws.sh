@@ -23,7 +23,7 @@ set -e
 # the 'down' step. This tag should not be already used by any other resources.
 # Also, there shouldn't be a key pair with the same name as the tag value.
 tag_key=project
-tag_value=aws-example-infra
+tag_value=example-infra-cli
 
 # Set output format to 'text' to facilitate capturing resource IDs.
 export AWS_DEFAULT_OUTPUT=text 
@@ -56,12 +56,12 @@ up() {
   aws ec2 authorize-security-group-ingress --group-id "$security_group_2_id" --protocol tcp --port 80 --cidr 0.0.0.0/0
   aws ec2 authorize-security-group-ingress --group-id "$security_group_2_id" --protocol tcp --port 22 --cidr "$(curl -s checkip.amazonaws.com)/32"
 
-  # Get ID of Ubuntu 18.04 AMI (AMI ID is different for each region)
-  ami_id=$(aws ec2 describe-images --filters "Name=name,Values=ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20200408" --query 'Images[0].ImageId')
-
   # Create key pair
   aws ec2 create-key-pair --key-name "$tag_value" --query KeyMaterial >"$tag_value".pem
   chmod 400 "$tag_value".pem
+
+  # Get ID of Ubuntu 18.04 AMI (AMI ID is different for each region)
+  ami_id=$(aws ec2 describe-images --filters "Name=name,Values=ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20200408" --query 'Images[0].ImageId')
 
   # Create instances (implicitly creates a network interface and volume for each instance)
   aws ec2 run-instances \

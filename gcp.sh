@@ -12,7 +12,7 @@
 set -e
 
 # Name for the resources. There should be no existing resources with this name.
-name=gcp-example-infra
+name=example-infra-cli
 
 up() {
   # Create VPC network 
