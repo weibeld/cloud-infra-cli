@@ -23,30 +23,30 @@ up() {
 
   # Create instances
   gcloud compute instances create "$name"-1 "$name"-2 "$name"-3 \
-    --subnet "$name" \
-    --image-family ubuntu-1804-lts \
-    --image-project ubuntu-os-cloud \
     --machine-type n1-standard-1 \
+    --image-project ubuntu-os-cloud \
+    --image-family ubuntu-1804-lts \
+    --subnet "$name" \
     --tags "$name"
 
   # Create firewall rule 1 (allow all incoming traffic from other instances)
   gcloud compute firewall-rules create "$name"-internal \
     --network "$name" \
-    --allow tcp,udp,icmp \
     --target-tags "$name" \
+    --allow tcp,udp,icmp \
     --source-tags "$name"
 
   # Create firewall rule 2 (allow incoming HTTP traffic from everywhere)
   gcloud compute firewall-rules create "$name"-http\
     --network "$name" \
-    --allow tcp:80 \
     --target-tags "$name"
+    --allow tcp:80 \
 
   # Create firewall rule 3 (allow incoming SSH traffic from your local machine)
   gcloud compute firewall-rules create "$name"-ssh \
     --network "$name" \
-    --allow tcp:22 \
     --target-tags "$name" \
+    --allow tcp:22 \
     --source-ranges "$(curl -s checkip.amazonaws.com)"/32
 
   cat <<EOF

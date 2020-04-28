@@ -1,25 +1,26 @@
-# Cloud example infrastructure
+# Example cloud infrastructure — CLI
 
-Scripts for creating a typical cloud infrastructure on the major cloud providers.
+This repo shows how to create an example cloud infrastructure on the major cloud providers with the official CLI clients.
 
-The purpose of this repo is to show how to use the command-line interfaces (CLIs) of the major cloud providers to create a typical cloud infrastructure.
+> _See also [cloud-infra-terraform](https://github.com/weibeld/cloud-infra-terraform) for creating the same cloud infrastructure with Terraform._
 
 ## Contents
 
-- **[`aws.sh`](aws.sh):** using the [`aws`](https://aws.amazon.com/cli/) command-line tool with Amazon Web Services (AWS)
-- **[`gcp.sh`](gcp.sh):** using the [`gcloud`](https://cloud.google.com/sdk/gcloud) command-line tool with Google Cloud Platfrom (GCP)
+- **[`aws.sh`](aws.sh):** using the [`aws`](https://aws.amazon.com/cli/) CLI client for creating AWS infrastructure
+- **[`gcp.sh`](gcp.sh):** using the [`gcloud`](https://cloud.google.com/sdk/gcloud) CLI client to create GCP infrastructure
 
 ## Cloud infrastructure
 
 The cloud infrastructure consists of the following generic components:
 
 - A virtual private cloud (VPC) network
-- A subnet (with a private IP address range of 10.0.0.0/16)
-- Firewall rules that allow the following types of incoming traffic:
-    - All traffic from other instances of the example infrastructure
-    - HTTP traffic from everywhere
-    - SSH traffic from your local machine
-- 3 compute instances (running Ubuntu 18.04)
+- A subnet with a private IP address range of 10.0.0.0/16
+- Firewall rules that allow the following types of traffic:
+    - All incoming traffic from other instances of the example infrastructure
+    - Incoming HTTP traffic from everywhere
+    - Incoming SSH traffic from your local machine
+    - All outgoing traffic to everywhere
+- 3 compute instances running Ubuntu 18.04
 
 All compute instances get a public IP address and you will be able to connect to them with SSH from your local machine.
 
@@ -27,7 +28,7 @@ _The concrete resources that are created for each cloud provider are listed belo
 
 ## Prerequisites
 
-To use the provided scripts, you must have an installed and fully configured command-line interface of the relevant cloud provider:
+You have to install and configure the CLI clients of the corresponding cloud providers:
 
 - [`aws`](https://aws.amazon.com/cli/) for AWS ([installation instructions](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html))
 - [`gcloud`](https://cloud.google.com/sdk/gcloud) for GCP ([installation instructions](https://cloud.google.com/sdk/gcloud#downloading_the_gcloud_command-line_tool))
@@ -50,7 +51,7 @@ Delete the infrastructure:
 ```bash
 ./aws.sh down
 ```
-### Resources
+### Created infrastructure
 
 The [`aws.sh`](aws.sh) script creates (and deletes) the following AWS resources:
 
@@ -62,9 +63,9 @@ The [`aws.sh`](aws.sh) script creates (and deletes) the following AWS resources:
 - 1 [key pair](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html)
 - 3 [EC2 instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html) (3 [EBS volumes](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AmazonEBS.html), 3 [network interfaces](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html))
 
-### Notes
+### Accessing the infrastructure
 
-After all resources have been created, you can list the IDs and public IP addresses of the created instances with:
+After all resources have been created, you can list the IDs and public IP addresses of the instances with:
 
 ```bash
 aws ec2 describe-instances \
@@ -73,11 +74,13 @@ aws ec2 describe-instances \
   --output text
 ```
 
-The `aws.sh up` command creates a private key file named `aws-example-infra.pem` in your current working directory. You can use this file to SSH to the instances as follows:
+The `aws.sh up` command creates a private key file named `example-infra-cli.pem` in your current working directory. You can use this private key to connect to any of the instances with SSH as follows:
 
 ```bash
-ssh -i aws-example-infra.pem ubuntu@PUBLIC_IP_ADDRESS
+ssh -i example-infra-cli.pem ubuntu@<PUBLIC_IP>
 ```
+
+Where `<PUBLIC_IP>` is the public IP address of the instance.
 
 ## Google Cloud Platform (GCP)
 
@@ -96,7 +99,7 @@ Delete the infrastructure:
 ./gcp.sh down
 ```
 
-### Resources
+### Created infrastructure
 
 The [`gcp.sh`](gcp.sh) script creates (and deletes) the following GCP resources:
 
@@ -105,25 +108,34 @@ The [`gcp.sh`](gcp.sh) script creates (and deletes) the following GCP resources:
 - 3 [firewall rules](https://cloud.google.com/vpc/docs/firewalls)
 - 3 [VM instances](https://cloud.google.com/compute/docs/instances)
 
-### Notes
+### Accessing the infrastructure
 
-After all resources have been created, you can list the created instances, including their private and public IP addresses, with:
-
-```bash
-gcloud compute instances list --filter 'tags.items=gcp-example-infra'
-```
-
-You can SSH to the instances with:
+After all resources have been created, you can list the created instances with:
 
 ```bash
-# As the default user
-gcloud compute ssh INSTANCE_NAME
-# As root
-gcloud compute ssh root@INSTANCE_NAME
+gcloud compute instances list --filter 'tags.items=example-infra-cli'
 ```
 
-You can also connect to the instances with a standalone SSH client as follows:
+The above command displays, among others, the name and public IP address of each instance.
+
+You can connect to any of the instances with:
 
 ```bash
-ssh -i ~/.ssh/google_compute_engine PUBLIC_IP_ADDRESS
+gcloud compute ssh <NAME>
 ```
+
+Where `<NAME>` is the name of the instance.
+
+You can also connect as root with:
+
+```bash
+gcloud compute ssh root@<NAME>
+```
+
+And you can also use the native SSH client with:
+
+```bash
+ssh -i ~/.ssh/google_compute_engine <PUBLIC-IP>
+```
+
+Where `<PUBLIC-IP>` is the public IP address of the instance.
