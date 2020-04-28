@@ -6,8 +6,8 @@ This repo shows how to create an example cloud infrastructure on the major cloud
 
 ## Contents
 
-- **[`aws.sh`](aws.sh):** using the [`aws`](https://aws.amazon.com/cli/) CLI client for creating AWS infrastructure
-- **[`gcp.sh`](gcp.sh):** using the [`gcloud`](https://cloud.google.com/sdk/gcloud) CLI client to create GCP infrastructure
+- **[`aws.sh`](aws.sh):** creating AWS infrastructure with the [`aws`](https://aws.amazon.com/cli/) CLI client
+- **[`gcp.sh`](gcp.sh):** creating GCP infrastructure with the [`gcloud`](https://cloud.google.com/sdk/gcloud) CLI client
 
 ## Infrastructure
 
