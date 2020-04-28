@@ -9,18 +9,20 @@ This repo shows how to create an example cloud infrastructure on the major cloud
 - **[`aws.sh`](aws.sh):** using the [`aws`](https://aws.amazon.com/cli/) CLI client for creating AWS infrastructure
 - **[`gcp.sh`](gcp.sh):** using the [`gcloud`](https://cloud.google.com/sdk/gcloud) CLI client to create GCP infrastructure
 
-## Cloud infrastructure
+## Infrastructure
 
-The cloud infrastructure consists of the following generic components:
+The example cloud infrastructure consists of the following generic components:
+
+![Example cloud infrastructure](assets/example-cloud-infra.png)
 
 - A virtual private cloud (VPC) network
 - A subnet with a private IP address range of 10.0.0.0/16
-- Firewall rules that allow the following types of traffic:
-    - All incoming traffic from other instances of the example infrastructure
-    - Incoming HTTP traffic from everywhere
-    - Incoming SSH traffic from your local machine
-    - All outgoing traffic to everywhere
 - 3 compute instances running Ubuntu 18.04
+- Firewall rules that allow the following types of traffic to/from the instances:
+    - Incoming SSH traffic from your local machine
+    - Incoming HTTP traffic from everywhere
+    - All incoming traffic from other instances of the example infrastructure
+    - All outgoing traffic to everywhere
 
 All compute instances get a public IP address and you will be able to connect to them with SSH from your local machine.
 
